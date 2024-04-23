@@ -1,6 +1,6 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
-import { User } from '../models/User.js'
+import { User, UserData } from '../models/User.js'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 const router = express.Router();
@@ -99,7 +99,10 @@ const verifyUser = async (req, res, next) => {
             return res.json({ status: false, message: "no token" })
         }
         const decoded = await jwt.verify(token, process.env.KEY);
-        next()
+        req.userId = decoded.id;
+
+        next();
+
     }
     catch (err) {
         return res.json(err)
@@ -110,6 +113,83 @@ router.get("/verify", verifyUser, (req, res) => {
     return res.json({status : true, message : "authorized"})
 
 })
+router.post('/create-user-data', verifyUser, async (req, res) => {
+    try {
+        const { data } = req.body;
+        const newUserData = new UserData({
+            data,
+            createdBy: req.userId // Associate the data with the authenticated user
+        });
+        await newUserData.save();
+        await User.findByIdAndUpdate(req.userId, { $push: { userData: newUserData._id } }); // Add this line
+
+        return res.json({ status: true, message: "User data created successfully" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Retrieve all user-specific data created by the authenticated user
+router.get('/user-data', verifyUser, async (req, res) => {
+    try {
+        const userData = await UserData.find({ createdBy: req.userId });
+        return res.json(userData);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Retrieve a single user-specific data by ID
+router.get('/user-data/:id', verifyUser, async (req, res) => {
+    try {
+        const singleUserData = await UserData.findOne({ _id: req.params.id, createdBy: req.userId });
+        if (!singleUserData) {
+            return res.status(404).json({ message: "User data not found" });
+        }
+        return res.json(singleUserData);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Update user-specific data by ID
+router.put('/update-user-data/:id', verifyUser, async (req, res) => {
+    try {
+        const { data } = req.body;
+        const updatedUserData = await UserData.findOneAndUpdate(
+            { _id: req.params.id, createdBy: req.userId },
+            { data },
+            { new: true }
+        );
+        if (!updatedUserData) {
+            return res.status(404).json({ message: "User data not found" });
+        }
+        return res.json({ status: true, message: "User data updated successfully", userData: updatedUserData });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Delete user-specific data by ID
+router.delete('/delete-user-data/:id', verifyUser, async (req, res) => {
+    try {
+        const deletedUserData = await UserData.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
+        if (!deletedUserData) {
+            return res.status(404).json({ message: "User data not found" });
+        }
+        return res.json({ status: true, message: "User data deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+
+
 
 router.get("/logout", (req, res) => {
     res.clearCookie('token')

@@ -1,0 +1,53 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #272a2e;
+    color: #fff;
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    margin-right: 20px;
+    text-decoration: none;
+    color: #fff;
+}
+
+.navbar-link {
+    color: #fff;
+    margin-left: 20px;
+    text-decoration: none;
+}
+
+.navbar-link:hover {
+    text-decoration: underline;
+}
+
+/* Media Queries */
+
+/* Small devices (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+    .navbar {
+        padding: 12px 10px;
+    }
+
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+
+    .navbar-link {
+        margin-left: 15px;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .navbar-brand {
+        font-size: 1.8rem;
+    }
+
+    .navbar-link {
+        margin-left: 30px;
+    }
+}

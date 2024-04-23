@@ -1,0 +1,93 @@
+.table {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 30px;
+    margin-bottom: 1rem;
+    background-image: linear-gradient(to right, #e49a12, #caeb39);
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  .table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  .table tbody + tbody {
+    border-top: 2px solid #dee2e6;
+  }
+  
+  .table .table-active,
+  .table .active > tbody > tr > td,
+  .table .active > tbody > tr > th,
+  .table .active > thead > tr > td,
+  .table .active > thead > tr > th,
+  .table .active > tfoot > tr > td,
+  .table .active > tfoot > tr > th {
+    background-color: rgba(0, 123, 255, 0.125);
+  }
+  
+  .table .table-active > tbody > tr > td,
+  .table .table-active > tbody > tr > th,
+  .table .table-active > thead > tr > td,
+  .table .table-active > thead > tr > th,
+  .table .table-active > tfoot > tr > td,
+  .table .table-active > tfoot > tr > th {
+    background-color: rgba(0, 123, 255, 0.125);
+  }
+  
+  .table .table-hover > tbody > tr:hover > td,
+  .table .table-hover > tbody > tr:hover > th {
+    background-color: rgba(0, 123, 255, 0.075);
+  }
+  
+  .table .table-edit-link {
+    text-align: center;
+    color: #007bff;
+    margin-right: 10px;
+  }
+  
+  .table .table-delete-link {
+    text-align: center;
+    
+    color: #dc3545;
+    
+  }
+  
+  .table .btn-outline-success {
+    color: #28a745;
+    background-color: transparent;
+    border-color: #28a745;
+  }
+  
+  .table .btn-outline-success:hover {
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+  }
+  
+  .table .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+  }
+  .text-center{
+    text-align: center;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #272a2e;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
