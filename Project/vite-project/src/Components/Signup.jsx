@@ -4,6 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
 
 const Signup = () => {
+  // const [InputField,setInputField] = useState({
+  //   username:"", email:"",password:"", usernameError:"", emailError:"", passwordError:"", error:""
+  //     })
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,6 +15,8 @@ const Signup = () => {
   const [passwordError, setPasswordError] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const EmailRegex = new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/i)
+  const PasswordRegex = new RegExp(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,10}$/)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,11 +32,11 @@ const Signup = () => {
       setPasswordError("Password is required");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(email)) {
+    if (!EmailRegex.test(email)) {
       setEmailError("Please enter a valid email address");
       return;
     }
-    if(!/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,10}$/.test(password))
+    if(!PasswordRegex.test(password))
     {
       setPasswordError("Password should be alphanumeric and only between 8-10 characters")
       return;
@@ -43,7 +48,8 @@ const Signup = () => {
         email,
         password,
       });
-      if (response.data.status) {
+      if (response && response.data.message === "User already existed") {
+        localStorage.setItem('authToken',response.data.token);
         navigate("/login");
       }
       else{

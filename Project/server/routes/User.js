@@ -1,10 +1,20 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
-import { User, UserData } from '../models/User.js'
+import { User} from '../models/User.js'
+import {UserData} from '../models/UserData.js'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
+import cors from 'cors'
+import {OAuth2Client} from 'google-auth-library'
 const router = express.Router();
+const client = new OAuth2Client(CLIENT_ID);
 
+
+
+router.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}))
 router.post('/Signup', async (req, res) => {
     const { username, email, password } = req.body;
     const user = await User.findOne({ email })
@@ -113,27 +123,58 @@ router.get("/verify", verifyUser, (req, res) => {
     return res.json({status : true, message : "authorized"})
 
 })
+// router.post('/create-user-data', verifyUser, async (req, res) => {
+//     try {
+//         const { data } = req.body; // Assuming data is the content of user-specific data
+//         const newUserData = new UserData({
+//             data,
+//             createdBy: req.userId // Associate the data with the authenticated user
+//         });
+//         await newUserData.save();
+//         return res.json({ status: true, message: "User data created successfully" });
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({ message: "Internal Server Error" });
+//     }
+// });
+
+
 router.post('/create-user-data', verifyUser, async (req, res) => {
     try {
-        const { data } = req.body;
+        const { name, email, age, phoneNumber, address } = req.body; // Extract data from the request body
+
+        // Create a new instance of UserData model with the extracted data
         const newUserData = new UserData({
-            data,
+            name,
+            email,
+            age,
+            phoneNumber,
+            address,
             createdBy: req.userId // Associate the data with the authenticated user
         });
-        await newUserData.save();
-        await User.findByIdAndUpdate(req.userId, { $push: { userData: newUserData._id } }); // Add this line
 
-        return res.json({ status: true, message: "User data created successfully" });
+        // console.log(newUserData)
+
+        // Save the new user data to the database
+        await newUserData.save();
+
+        return res.json({ status: true, message: "User data created successfully", userData: newUserData });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 });
 
+
+
+
 // Retrieve all user-specific data created by the authenticated user
 router.get('/user-data', verifyUser, async (req, res) => {
+    
     try {
-        const userData = await UserData.find({ createdBy: req.userId });
+        console.log("hi")
+        const userData = await UserData.find();
+        console.log(userData)
         return res.json(userData);
     } catch (error) {
         console.error(error);

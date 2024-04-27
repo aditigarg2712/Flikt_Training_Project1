@@ -1,10 +1,16 @@
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    
     padding: 12px 20px;
     background-color: #272a2e;
     color: #fff;
+    z-index: 1000;
 }
 
 .navbar-brand {
@@ -15,31 +21,44 @@
 }
 
 .navbar-link {
+  
     color: #fff;
     margin-left: 20px;
     text-decoration: none;
 }
 
-.navbar-link:hover {
-    text-decoration: underline;
-}
+/* Media Queries */
 
+/* Small devices (portrait phones, less than 576px) */
 /* Media Queries */
 
 /* Small devices (portrait phones, less than 576px) */
 @media (max-width: 575.98px) {
     .navbar {
-        padding: 12px 10px;
+      padding: 12px 10px; /* Adjust padding for equal margins on both sides */
     }
-
+  
     .navbar-brand {
-        font-size: 1.5rem;
+      font-size: 1.5rem;
+      margin-right: 5px; /* Adjust margin for better alignment */
     }
-
+  
     .navbar-link {
-        margin-left: 15px;
+      margin-left: 5px; /* Adjust margin for better alignment */
     }
-}
+  }
+  
+  /* Large devices (desktops, 992px and up) */
+  @media (min-width: 992px) {
+    .navbar-brand {
+      font-size: 1.8rem;
+    }
+  
+    .navbar-link {
+      margin-left: 30px;
+    }
+  }
+  
 
 /* Large devices (desktops, 992px and up) */
 @media (min-width: 992px) {

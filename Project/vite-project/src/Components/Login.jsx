@@ -1,4 +1,6 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
+import '@fortawesome/fontawesome-free/css/all.css';
+import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 
 import "../App.css";
 import Axios from "axios";
@@ -6,8 +8,8 @@ import { Link,useNavigate } from "react-router-dom";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+const [user, setUser] = useState("");
+  
   const [error, setError] = useState("");
 
   
@@ -16,23 +18,13 @@ const Login = () => {
   Axios.defaults.withCredentials = true;
   const handleSubmit = (e) => {
     e.preventDefault();
-    if(email === "")
+    if((email === "" && password === "") || (email !== "" && password === "") || (email === "" && password !== ""))
     {
-      setEmailError("Email is required");
-    }
-    if(password === "")
-    {
-      setPasswordError("Password is required");
+      setError("Invalid login or password. Please try again");
       return;
+    
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
-    if(!/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,10}$/.test(password)){
-      setPasswordError("Incorrect password");
-      return;
-    }
+    
 
     Axios.post("http://localhost:3000/auth/login", {
       email,
@@ -48,9 +40,37 @@ const Login = () => {
     }).catch(err =>{
         console.log(err)
     })
-    setEmailError("");
-    setPasswordError("");
+    
   };
+const handleGoogleLogin = useGoogleLogin({
+    onSuccess: (codeResponse) => setUser(codeResponse),
+    onError: (error) => console.log('Login Failed:', error)
+});
+useEffect(
+    () => {
+        if (user) {
+            Axios
+                .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
+                    headers: {
+                        Authorization: `Bearer ${user.access_token}`,
+                        Accept: 'application/json'
+                    }
+                })
+                .then((res) => {
+                    setProfile(res.data);
+                    navigate('/login');
+                })
+                .catch((err) => console.log(err));
+        }
+    },
+    [ user ]
+);
+
+// log out function to log the user out of google and set the profile array to null
+const logOut = () => {
+    googleLogout();
+    setProfile(null);
+};
 
   return (
     <div className="sign-up-container">
@@ -65,7 +85,7 @@ const Login = () => {
           placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
         />
-        {emailError && <span style={{ color: "red" }}>{emailError}</span>}
+        
 
 
         <label htmlFor="password">Password</label>
@@ -74,12 +94,26 @@ const Login = () => {
           placeholder="******"
           onChange={(e) => setPassword(e.target.value)}
         />
-        {passwordError && <span style={{ color: "red" }}>{passwordError}</span>}
+        
 
 
         <button type="submit">Login</button>
         <Link to='/ForgotPassword'>Forgot Password?</Link>
         <p>Do not have an Account? <Link to ="/">Sign Up</Link></p> 
+<h6>or sign in with</h6>
+        <div className="social-container">
+          <a href="#" className="social">
+          <i className={`fab fa-facebook-f`} />
+          </a>
+          <a href="#"  className="social" onClick={handleGoogleLogin}>
+          <i className={`fab fa-google-plus-g`} />
+          
+          </a>
+          <a href="#" className="social">
+          <i className={`fab fa-linkedin-in`} />
+          </a>
+        </div>
+
       </form>
     </div>
   );

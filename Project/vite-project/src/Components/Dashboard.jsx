@@ -1,50 +1,73 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import Axios from "axios";
 import Navbar from '../Components/Navbar';
 import '../Table.css';
 import AddUser from '../Components/AddUser'; // Import the AddUser component
 
-const Dashboard = () => {
+
+const Dashboard = ({userData, setUserData}) => {
     const navigate = useNavigate();
+    const isRendered = useRef(false);
     const [showAddUserPopup, setShowAddUserPopup] = useState(false); // State variable for controlling the visibility of the Add User popup
     const [users, setUsers] = useState([
         // Initialize with some default users
         
       ]);
 
-    useEffect(() => {
-        axios.get("http://localhost:3000/auth/verify").then((res) => {
-            console.log(res.data);
-            if (!res.data.status) {
-                navigate("/login");
-                return;
+      useEffect(() => {
+        const verifyUser = async () => {
+            if (token)
+            {
+                const response = await Axios.get("http://localhost:3000/auth/verify", { token })
+                if(response.status === 200){
+                    setUserData(response.data)
+                    isRendered.current = true
+
+                }
+                else{
+                    const data = response.data
+                }
             }
-                
+        }
+        verifyUser()
+    },[])
+
+    useEffect( () => {
+        let res
+        const fetchUserData = async () => {
+            if (userData)
+            {
+                res= await Axios.get('http://localhost:3000/auth/user-data/${userData.userId}')
+            }
+        }
+    })
+            
+    const fetchUserData = () => {
+        // console.log(userId)
+        console.log("hi")
+        Axios.get('http://localhost:3000/auth/user-data').then((res) => {
+            setUsers(res.data); // Update state with the fetched user data
+            console.log("hello")
+        }).catch((error) => {
+            console.error(error);
         });
-    }, []);
-
-    axios.defaults.withCredentials = true;
-
-    // const handleLogout = () => {
-    //     axios.get("http://localhost:3000/auth/logout").then((res) => {
-    //         if (res.data.status) {
-    //             navigate("/login");
-    //             return;
-    //         }
-    //     }).catch(err => {
-    //         console.log(err)
-    //     })
-    // }
-    const handleAddUser = (newUser) => {
-        
-                    setUsers([...users, newUser]); // Update state with the new user
-                
     };
 
+    Axios.defaults.withCredentials = true;
+
+    const handleAddUser = (newUser) => {
+        setUsers([...users, newUser]); // Update state with the new user
+        
+    };
+    
+        
+    
     return (
         <>
             <Navbar />
+            <br></br>
+            <br></br>
             <div className="container">
 
                 <table className="table mt-7">
@@ -75,30 +98,36 @@ const Dashboard = () => {
                     </tbody>
                 </table>
                 <button className="btn btn-success" onClick={() => setShowAddUserPopup(true)}>+ Add New User</button>
-                
-                {showAddUserPopup && (
+                </div>
+                {/* {showAddUserPopup && (
                     <div className ="add-user-popup">
                         <div className="add-user-popup-inner">
                             <span className="close-popup" onClick={() => setShowAddUserPopup(false)}>×</span>
                             {/* Pass handleAddUser function to AddUser component */}
-                            <AddUser onAddUser={handleAddUser} />
+                            {/* <AddUser onAddUser={handleAddUser} />
                         </div>
+                </div> */}
+                    {showAddUserPopup && (
+                <div className="add-user-modal">
+                    <div className="add-user-popup">
+                        {/* <span className="close-popup" onClick={() => setShowAddUserPopup(false)}>×</span> */}
+                        <AddUser onAddUser={handleAddUser} setShowAddUserPopup={setShowAddUserPopup} />
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </>
     );
 }
 
 export default Dashboard;
 export const handleLogout = () => {
-    axios.get("http://localhost:3000/auth/logout")
-        .then((res) => {
-            if (res.data.status) {
-                navigate("/login");
-                return;
-            }
-        })
+    localStorage.removeItem("token");
+    Axios.get("http://localhost:3000/auth/logout")
+        .then(() => 
+                navigate("/login"))
+                
+            
+        
         .catch(err => {
             console.log(err);
         });
