@@ -7,8 +7,9 @@ const UserDataSchema = new mongoose.Schema({
     email: {type: String, required: true},
     phoneNumber: {type: Number, required: true},
     address: {type: String, required: true},
+    action: String,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // Reference to the user who created the data
-}, { timestamps: true }); // Add timestamps for createdAt and updatedAt fields
+}); // Add timestamps for createdAt and updatedAt fields
 
 // Create the UserData model
 const UserData = mongoose.model('UserData', UserDataSchema);

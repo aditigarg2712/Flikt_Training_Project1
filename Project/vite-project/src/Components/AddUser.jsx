@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import '../AddUser.css';
 import  Axios  from "axios";
 
-const AddUser = ({ onAddUser,setShowAddUserPopup }) => {
+const AddUser = ({ onAddUser,setShowAddUserPopup}) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
@@ -41,28 +41,32 @@ const AddUser = ({ onAddUser,setShowAddUserPopup }) => {
       setEmailError("Please enter a valid email address");
       return;
     }
+    const userId = localStorage.getItem("userId");
 
+    
     // Create a new user object with the inputted details
     const newUser = {
       name,
       email,
       age,
       phoneNumber,
-      address
+      address,
+      createdBy : userId
     };
 
+
+    console.log(userId);
     const response = await Axios.post("http://localhost:3000/auth/create-user-data", newUser);
     // Call the onAddUser function passed from Dashboard and pass the new user object
     console.log(response.data.userData)
     onAddUser(response.data.userData);
-   
-
     // Clear input fields after adding user
     setName("");
     setEmail("");
     setAge("");
     setPhoneNumber("");
     setAddress("");
+  
 
     setShowAddUserPopup(false);
 

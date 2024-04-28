@@ -1,71 +1,101 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import Axios from "axios";
 import Navbar from '../Components/Navbar';
 import '../Table.css';
 import AddUser from '../Components/AddUser'; // Import the AddUser component
 
-
-const Dashboard = ({userData, setUserData}) => {
+const Dashboard = () => {
+    
+    
     const navigate = useNavigate();
-    const isRendered = useRef(false);
+
+
     const [showAddUserPopup, setShowAddUserPopup] = useState(false); // State variable for controlling the visibility of the Add User popup
     const [users, setUsers] = useState([
         // Initialize with some default users
         
       ]);
+      
 
-      useEffect(() => {
-        const verifyUser = async () => {
-            if (token)
-            {
-                const response = await Axios.get("http://localhost:3000/auth/verify", { token })
-                if(response.status === 200){
-                    setUserData(response.data)
-                    isRendered.current = true
-
-                }
-                else{
-                    const data = response.data
-                }
-            }
-        }
-        verifyUser()
-    },[])
-
-    useEffect( () => {
-        let res
-        const fetchUserData = async () => {
-            if (userData)
-            {
-                res= await Axios.get('http://localhost:3000/auth/user-data/${userData.userId}')
-            }
-        }
-    })
+      
+        useEffect(() => {
             
-    const fetchUserData = () => {
-        // console.log(userId)
-        console.log("hi")
-        Axios.get('http://localhost:3000/auth/user-data').then((res) => {
-            setUsers(res.data); // Update state with the fetched user data
-            console.log("hello")
+            const userId = localStorage.getItem("userId");
+            if(!userId)
+            {
+                navigate("/login");
+                return;
+            
+            }
+
+        //     fetchUserData();
+    
+        //     return () => {
+        //         setUsers([]);
+        //     };
+        // }, []);
+        Axios.get("http://localhost:3000/auth/verify").then((res) => {
+            console.log(res.data);
+            if (!res.data.status) {
+                navigate("/login");
+                return;
+            }
+            
+            // If authentication is successful, fetch user data
+            fetchUserData(userId);   
+            
+            
+
         }).catch((error) => {
             console.error(error);
         });
-    };
+    }, []);
+    
 
-    Axios.defaults.withCredentials = true;
+    const fetchUserData = (userId) => {
+        
+       // const userId = localStorage.getItem("userId");
+        Axios.get(`http://localhost:3000/auth/user-data/${userId}`).then((res) => {
+            setUsers(res.data);
+                console.log(res.data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
+            
+    //         setUsers(prevUsers => [...prevUsers, ...res.data]);
+    //         console.log(res.data);
+    //     }).catch((error) => {
+    //         console.error(error);
+    //     });
+    // };
+
+
+    // Axios.defaults.withCredentials = true;
 
     const handleAddUser = (newUser) => {
         setUsers([...users, newUser]); // Update state with the new user
         
     };
-    
+    const handleLogout = () => {
+        Axios.get("http://localhost:3000/auth/logout")
+            .then((res) => {
+                if (res.data.status) {
+                    navigate("/login");
+                    setUsers([]);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    };
         
     
     return (
         <>
-            <Navbar />
+            <Navbar handleLogout={handleLogout} />
             <br></br>
             <br></br>
             <div className="container">
@@ -111,7 +141,7 @@ const Dashboard = ({userData, setUserData}) => {
                 <div className="add-user-modal">
                     <div className="add-user-popup">
                         {/* <span className="close-popup" onClick={() => setShowAddUserPopup(false)}>×</span> */}
-                        <AddUser onAddUser={handleAddUser} setShowAddUserPopup={setShowAddUserPopup} />
+                        <AddUser onAddUser={handleAddUser} setShowAddUserPopup={setShowAddUserPopup}/>
                     </div>
                 </div>
             )}
@@ -120,15 +150,23 @@ const Dashboard = ({userData, setUserData}) => {
 }
 
 export default Dashboard;
-export const handleLogout = () => {
-    localStorage.removeItem("token");
-    Axios.get("http://localhost:3000/auth/logout")
-        .then(() => 
-                navigate("/login"))
+// export const handleLogout = () => {
+    
+//     Axios.get("http://localhost:3000/auth/logout")
+//         .then((res) => {
+//         if(res.data.status)
+//         {
+//             navigate("/login");
+//             return;
+
+
+//         }
+//     })
+                
                 
             
         
-        .catch(err => {
-            console.log(err);
-        });
-};
+//         .catch(err => {
+//             console.log(err);
+//         });
+// };

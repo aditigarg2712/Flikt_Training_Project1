@@ -1,6 +1,6 @@
 import React from 'react'
 import '../navbar.css';
-import {handleLogout} from '../Components/Dashboard';
+//import {handleLogout} from '../Components/Dashboard';
 
 
 
@@ -8,7 +8,7 @@ import {handleLogout} from '../Components/Dashboard';
 
 
 
-const Navbar = () =>{
+const Navbar = ({handleLogout}) =>{
     
     
     

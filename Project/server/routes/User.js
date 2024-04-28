@@ -1,20 +1,11 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 import { User} from '../models/User.js'
-import {UserData} from '../models/UserData.js'
+import { UserData} from '../models/UserData.js'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
-import cors from 'cors'
-import {OAuth2Client} from 'google-auth-library'
 const router = express.Router();
-const client = new OAuth2Client(CLIENT_ID);
 
-
-
-router.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}))
 router.post('/Signup', async (req, res) => {
     const { username, email, password } = req.body;
     const user = await User.findOne({ email })
@@ -47,7 +38,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ username: user.username }, process.env.KEY, { expiresIn: '1h' })
     res.cookie('token', token, { httpOnly: true, maxAge: 360000 })
-    return res.json({ status: true, message: "login Successfully" })
+    return res.json({ status: true, message: "login Successfully",userId: user._id })
 
 })
 
@@ -123,25 +114,11 @@ router.get("/verify", verifyUser, (req, res) => {
     return res.json({status : true, message : "authorized"})
 
 })
-// router.post('/create-user-data', verifyUser, async (req, res) => {
-//     try {
-//         const { data } = req.body; // Assuming data is the content of user-specific data
-//         const newUserData = new UserData({
-//             data,
-//             createdBy: req.userId // Associate the data with the authenticated user
-//         });
-//         await newUserData.save();
-//         return res.json({ status: true, message: "User data created successfully" });
-//     } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({ message: "Internal Server Error" });
-//     }
-// });
 
 
 router.post('/create-user-data', verifyUser, async (req, res) => {
     try {
-        const { name, email, age, phoneNumber, address } = req.body; // Extract data from the request body
+        const { name, email, age, phoneNumber, address,createdBy } = req.body; // Extract data from the request body
 
         // Create a new instance of UserData model with the extracted data
         const newUserData = new UserData({
@@ -150,7 +127,7 @@ router.post('/create-user-data', verifyUser, async (req, res) => {
             age,
             phoneNumber,
             address,
-            createdBy: req.userId // Associate the data with the authenticated user
+            createdBy // Associate the data with the authenticated user
         });
 
         // console.log(newUserData)
@@ -167,25 +144,10 @@ router.post('/create-user-data', verifyUser, async (req, res) => {
 
 
 
-
-// Retrieve all user-specific data created by the authenticated user
-router.get('/user-data', verifyUser, async (req, res) => {
-    
-    try {
-        console.log("hi")
-        const userData = await UserData.find();
-        console.log(userData)
-        return res.json(userData);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
-});
-
 // Retrieve a single user-specific data by ID
 router.get('/user-data/:id', verifyUser, async (req, res) => {
     try {
-        const singleUserData = await UserData.findOne({ _id: req.params.id, createdBy: req.userId });
+        const singleUserData = await UserData.find({ createdBy: req.params.id });
         if (!singleUserData) {
             return res.status(404).json({ message: "User data not found" });
         }
@@ -238,4 +200,4 @@ router.get("/logout", (req, res) => {
 
 })
 
-export { router as UserRouter }
+export { router as UserRouter}
